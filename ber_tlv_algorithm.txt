@@ -1,0 +1,113 @@
+TLV stands for Tag - Length - Value
+
+___________________________________________________________________________________
+- Tag (T):
+
+Divided in two bytes.
+First byte:
+
+| b8 | b7 | b6 | b5 | b4 | b3 | b2 | b1 |   Meaning               |
+|  0 |  0 |                             | Universal Class         |
+|  0 |  1 |                             | Application Class       |
+|  1 |  0 |                             | Context-specific Class  |
+|  1 |  1 |                             | Private Class           |
+|         |  0 |                        | Primitive data object   |
+|         |  1 |                        | Constructed data object |
+|              |  1 |  1 |  1 |  1 |  1 | See subsequent bytes    |
+|              | Any other value < 31   | Tag number              |
+
+Second byte:
+The second byte will be used when the tag value is >=31 (first 5 bits == 0b11111)
+
+| b8 | b7 | b6 | b5 | b4 | b3 | b2 | b1 |   Meaning               |
+|  1 |                                  | Another byte follows    |
+|  0 |                                  | Last tag byte           |
+|    |           Any value > 0          | (Part of) tag number    |
+
+- Length (L):
+First byte (most signficative):
+
+| b8 | b7 | b6 | b5 | b4 | b3 | b2 | b1 |   Meaning                 |
+|  0 |                                  | Length consists of 1 byte |
+|    |   Length value 1 <= L <= 127     | Length value              |
+|  1 |                                  | Length > 1 byte           |
+|    | Number of bytes in the value     |                           | // Check example
+Two bytes are necessary to express up to 255 bytes in the value field
+
+- Value:
+
+On a primitive BER-TLV Data object:
+A data element is the value field (V). 
+A data element is the smallest data field that receives an identifier (a tag).
+T-L-V
+
+On a constructed BER-TLV data object:
+Value field is composed of one or more BER-TLV data objects.
+T-L-[primitive/constructed data object 1 | 2 ... | n]
+
+___________________________________________________________________________________
+Example:
+
+- Input:
+
+size_t objLen = 13;
+uint8_t tlvObject[objLen] = {
+  0xE1, 0x0B, 0xC1, 0x03, 0x01, 0x02,
+  0x03, 0xC2, 0x00, 0xC3, 0x02, 0xAA,
+  0xBB
+};
+
+- Output:
+
+TAG - 0xE1 (private class, constructed)
+LEN - 11 bytes
+
+  TAG - 0xC1 (private class, primitive)
+  LEN - 3 bytes
+  VAL - 0x01 0x02 0x03
+
+  TAG - 0xC2 (private class, primitive)
+  LEN - 0 bytes
+
+  TAG - 0xC3 (private class, primitive)
+  LEN - 2 bytes
+  VAL - 0xAA 0xBB
+
+___________________________________________________________________________________
+Output format rules:
+
+- Basic template:
+"
+TAG - 0x$tag_value ($type_of_class 'class', $primitive/constructed)
+LEN - 0x$len_value
+(if has VAL:) VAL - $val_list
+new_line
+(if is constructed:) increase identation spaces (+2)
+
+___________________________________________________________________________________
+Requirements:
+
+- Full C Language
+- No 3rd-party libs
+- .so lib containing the BER-TLV interpreter
+- Program using the previous lib to print the TLV content on screen
+- Building process must use CMake ou Makefile
+- High quality documentation
+
+Extra:
+
+- Tests framework
+  - Include unit test (maybe?)
+  - Automatized test (we may use python here)
+
+___________________________________________________________________________________
+Possible approach:
+
+TDD? Create test program before application.
+
+Divide in sub functions:
+- readTag()
+- readLen()
+- readVal()
+
+State Machine
