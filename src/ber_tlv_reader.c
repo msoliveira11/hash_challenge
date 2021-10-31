@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include "stack.h"
+#include <ber_tlv_reader.h>
 
 enum States
 {
@@ -207,6 +201,19 @@ void printOutput(const size_t len, const uint8_t objects[]) {
                     printf("\n");
                 }
                 uint32_t lowerCounter = pop(&valLengthStack);
+                while (lowerCounter != INT_MIN) {
+                    int32_t bytesLeft = (int32_t)(lowerCounter-(i-startingI));
+                    //printf("bytes left: %d\n", bytesLeft);
+                    if (bytesLeft <= 0) {
+                        --indentationLevel;
+                        //printf("level: %d\n", indentationLevel);
+                    }
+                    else {
+                        push(&valLengthStack,bytesLeft);
+                    }
+                    lowerCounter = pop(&valLengthStack);
+                }
+                /* uint32_t lowerCounter = pop(&valLengthStack);
                 if (lowerCounter != INT_MIN) {
                     int32_t bytesLeft = (int32_t)(lowerCounter-(i-startingI));
                     printf("bytes left: %d\n", bytesLeft);
@@ -217,7 +224,7 @@ void printOutput(const size_t len, const uint8_t objects[]) {
                     push(&valLengthStack,bytesLeft);
                 } else {
                     printf("INT_MIN\n");
-                }
+                }*/
                 currentState = ST_IDLE;
             }
             default:
@@ -227,35 +234,3 @@ void printOutput(const size_t len, const uint8_t objects[]) {
         }
     }
 }
-
-int main() {
-
-    size_t objLen = 19;
-
-    uint8_t tlvObject[objLen];
-
-    tlvObject[0] = 0xE1;
-    tlvObject[1] = 0x09;
-    tlvObject[2] = 0xC1;
-    tlvObject[3] = 0x03;
-    tlvObject[4] = 0x01;
-    tlvObject[5] = 0x02;
-    tlvObject[6] = 0x03;
-    tlvObject[7] = 0xC2;
-    tlvObject[8] = 0x00;
-    tlvObject[9] = 0xE1;
-    tlvObject[10] = 0x04;
-    tlvObject[11] = 0xC3;
-    tlvObject[12] = 0x02;
-    tlvObject[13] = 0xAA;
-    tlvObject[14] = 0xBB;
-    tlvObject[15] = 0xC3;
-    tlvObject[16] = 0x02;
-    tlvObject[17] = 0xAA;
-    tlvObject[18] = 0xBB;
-
-    printOutput(objLen,tlvObject); 
-   
-    return 0;
-}
-
