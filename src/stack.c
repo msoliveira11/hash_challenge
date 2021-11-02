@@ -1,7 +1,5 @@
-// C program for linked list implementation of stack
 #include "stack.h"
 
-// A structure to represent a stack
 struct StackNode {
     uint32_t data;
     struct StackNode* next;
@@ -27,7 +25,6 @@ void push(struct StackNode** root, uint32_t data)
     struct StackNode* stackNode = newNode(data);
     stackNode->next = *root;
     *root = stackNode;
-    //printf("%d pushed to stack\n", data);
 }
  
 uint32_t pop(struct StackNode** root)
@@ -40,11 +37,4 @@ uint32_t pop(struct StackNode** root)
     free(temp);
  
     return popped;
-}
- 
-uint32_t top(struct StackNode* root)
-{
-    if (isEmpty(root))
-        return INT_MIN;
-    return root->data;
 }

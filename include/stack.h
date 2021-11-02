@@ -1,4 +1,5 @@
 // C program for linked list implementation of stack
+// It contains the minimum methods to attend our needs
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,5 +15,3 @@ uint32_t isEmpty(struct StackNode* root);
 void push(struct StackNode** root, uint32_t data);
  
 uint32_t pop(struct StackNode** root);
- 
-uint32_t peek(struct StackNode* root);

@@ -1,3 +1,11 @@
+/* --------------------------------------------------------------
+ * file: ber_tlv_reader.c
+ * author: Matheus Santos de Oliveira
+ * e-mail: msoliveira.eca@gmail.com
+ * description: Source file for tlv data decoder. 
+ * --------------------------------------------------------------
+ */
+
 #include <ber_tlv_reader.h>
 
 void printIndent(uint8_t level) {
@@ -7,9 +15,12 @@ void printIndent(uint8_t level) {
 }
 
 void printOutput(const size_t len, const uint8_t objects[]) {
-    uint32_t i=0;
+    uint32_t i=0; // "i" will be used to iterate over the input array 
+
+    // the variables below are going to be used within the state machine execution
+    // and are going to be shared between states
     uint8_t currentState=0;
-    char *strs[len];
+    // the stack will hold the "L - length" values to deal with constructed classes
     struct StackNode* valLengthStack = NULL;
     bool primitive = false;
     int8_t indentationLevel = 0;
@@ -17,6 +28,13 @@ void printOutput(const size_t len, const uint8_t objects[]) {
     while (i < len) {
 
         uint32_t valLength = 0;
+        // All states will follow the same "structure":
+        // First we are going to read each bit/group of bits to decode their meaning.
+        // If we need to decode multiple bytes within the same state, we'll use a loop.
+        // The string will be built along the data decoding.
+        // When we finish building the string, it will be printed to screen.
+        // The memory allocated will be free.
+        // We'll decide whats the next state and jump to it. 
         switch (currentState) 
         {
             case ST_IDLE:
@@ -31,6 +49,8 @@ void printOutput(const size_t len, const uint8_t objects[]) {
             }
             case ST_TAG:
             {
+                // Storing actual i 
+                uint8_t startingI = i;
                 // Decoding first byte TAG field.
                 char *tagClass;
 
@@ -123,7 +143,7 @@ void printOutput(const size_t len, const uint8_t objects[]) {
                 ++i; // Move to next byte
                 uint32_t lowerCounter = pop(&valLengthStack);
                 if (lowerCounter != INT_MIN) {
-                    push(&valLengthStack,--lowerCounter);
+                    push(&valLengthStack,(lowerCounter-(i-startingI)));
                 }
                 break;
             }
@@ -218,10 +238,8 @@ void printOutput(const size_t len, const uint8_t objects[]) {
                 uint32_t lowerCounter = pop(&valLengthStack);
                 while (lowerCounter != INT_MIN) {
                     int32_t bytesLeft = (int32_t)(lowerCounter-(i-startingI));
-                    //printf("bytes left: %d\n", bytesLeft);
                     if (bytesLeft <= 0) {
                         --indentationLevel;
-                        //printf("level: %d\n", indentationLevel);
                     } else {
                         push(&valLengthStack,bytesLeft);
                         break;
