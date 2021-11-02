@@ -82,7 +82,7 @@ TAG - 0x$tag_value ($type_of_class 'class', $primitive/constructed)
 LEN - 0x$len_value
 (if has VAL:) VAL - $val_list
 new_line
-(if is constructed:) increase identation spaces (+2)
+(if is constructed:) increase indentation spaces (+2)
 
 ___________________________________________________________________________________
 Requirements:
@@ -91,23 +91,41 @@ Requirements:
 - No 3rd-party libs
 - .so lib containing the BER-TLV interpreter
 - Program using the previous lib to print the TLV content on screen
-- Building process must use CMake ou Makefile
+- Building process must use CMake or Makefile
 - High quality documentation
-
-Extra:
-
-- Tests framework
-  - Include unit test (maybe?)
-  - Automatized test (we may use python here)
-
 ___________________________________________________________________________________
-Possible approach:
 
-TDD? Create test program before application.
+Questions:
 
-Divide in sub functions:
-- readTag()
-- readLen()
-- readVal()
 
-State Machine
+No caso da TAG apresentar os 5 últimos bits com valor 1 (ex: 0x3F 0xF0 0x70), a representação
+na tela ficaria da seguinte maneira?
+TAG - 0x3F 0xF0 0x70 (universal class, constructed) 
+Ou seja, como são pedidos bits subsequentes no primeiro byte, e o segundo indica que há um 
+byte a seguir e o terceiro indica final da TAG,
+devo concatená-lo ao descrever a TAG?
+
+Mas podemos te orientar que sobre o tópico da "TAG": Sim, tudo é parte da TAG, 
+a representacao pode ser feita desta forma.
+
+
+
+O segundo caso me deixou um pouco confuso, tentei procurar por algum exemplo na 
+internet, mas ainda não achei.
+Tendo o bit8==1, para este primeiro byte, os bits 7 a 1 indicarão quantos bytes 
+a seguir deste são necessários para
+descrever o valor de "length", certo?
+Se a afirmativa anterior estiver correta, para indicar o valor de length == 255, 
+eu precisaria ter:
+0x81 0xFF Correto?
+0x81 -> 0b1000001
+Para um valor maior do que 255, eu precisaria utilizar mais do que dois bytes de 
+length. Sendo assim, posso considerar
+que os bytes contendo os valores de length devem ser "concatenados" para dar o 
+resultado final? Por exemplo:
+Para length == 256 -> 0x82 0x01 0x00
+Com os bytes acima eu teria, para o valor de length: 0b1 0000 0000 == 256
+
+E o último ponto sobre: "Se a afirmativa anterior estiver correta, para indicar o valor de 
+length == 255, eu precisaria ter: 0x81 0xFF Correto?". 
+Você pode considerar suas interpretações corretas, ok?!

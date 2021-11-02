@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <ber_tlv_reader.h>
 
-int main() {
+void runTestData() {
 
-    size_t objLen = 19;
+    size_t objLen = 21 + 256;
 
     uint8_t tlvObject[objLen];
 
@@ -22,12 +22,23 @@ int main() {
     tlvObject[12] = 0x02;
     tlvObject[13] = 0xAA;
     tlvObject[14] = 0xBB;
-    tlvObject[15] = 0xC3;
-    tlvObject[16] = 0x02;
-    tlvObject[17] = 0xAA;
-    tlvObject[18] = 0xBB;
+    tlvObject[15] = 0xDF;
+    tlvObject[16] = 0xF0;
+    tlvObject[17] = 0x70;
+    tlvObject[18] = 0x82;
+    tlvObject[19] = 0x01;
+    tlvObject[20] = 0x00;
+
+    for (size_t i=0; i<256; ++i) {
+        tlvObject[i+21] = i;
+    }
 
     printOutput(objLen,tlvObject); 
+
+}
+
+int main() {
+    runTestData();
    
     return 0;
 }
