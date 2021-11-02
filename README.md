@@ -1,7 +1,7 @@
 # hash_challenge
 Repository meant to store the code related do Hash Embedded Dev Challenge.
 
-A summary of the problem might and some observations may be found in the file
+A summary of the problem and some observations may be found in the file:
 "ber_tlv_algorith.txt".
 
 To build:
